@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"go.mozilla.org/sops/v3/decrypt"
+	"go.mozilla.org/sops/decrypt"
 )
 
 func dataSourceSopsAgeFile() *schema.Resource {

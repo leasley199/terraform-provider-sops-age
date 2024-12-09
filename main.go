@@ -1,16 +1,28 @@
-package main
+package sopsage
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/plugin"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/leasley199/terraform-provider-sops-age/sopsage"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
-func main() {
+func Provider() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderAddr: "registry.terraform.io/leasley199/sops-age",
+
 		ProviderFunc: func() *schema.Provider {
-			return sopsage.Provider()
+			return &schema.Provider{
+				Schema: map[string]*schema.Schema{
+					"passphrase": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+				ResourcesMap: map[string]*schema.Resource{
+					"sops_age_key": resourceSopsAgeKey(),
+				},
+				DataSourcesMap: map[string]*schema.Resource{
+					"sops_age_file": dataSourceSopsAgeFile(),
+				},
+			}
 		},
 	})
 }
