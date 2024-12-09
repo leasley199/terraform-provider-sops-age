@@ -2,6 +2,10 @@ package main
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/sha256"
 	"fmt"
 	"io"
 
@@ -9,6 +13,7 @@ import (
 	"filippo.io/age/armor"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 func main() {
@@ -16,7 +21,7 @@ func main() {
 		ProviderFunc: func() *schema.Provider {
 			return &schema.Provider{
 				Schema: map[string]*schema.Schema{
-					"encryption_key": {
+					"passphrase": {
 						Type:     schema.TypeString,
 						Optional: true,
 					},
@@ -56,13 +61,12 @@ func resourceSopsAgeKeyCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	// Get the encryption key from the provider configuration
-	encryptionKey, ok := d.GetOk("encryption_key")
-
+	// Get the passphrase from the provider configuration
+	passphrase, ok := d.GetOk("passphrase")
 	var encryptedPrivateKey string
 	if ok {
-		// Encrypt the private key
-		encryptedPrivateKey, err = encryptWithAge(identity.String(), encryptionKey.(string))
+		// Encrypt the private key with the passphrase
+		encryptedPrivateKey, err = encryptWithPassphrase(identity.String(), passphrase.(string))
 		if err != nil {
 			return err
 		}
@@ -90,25 +94,36 @@ func resourceSopsAgeKeyDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func encryptWithAge(data, encryptionKey string) (string, error) {
-	recipient, err := age.ParseX25519Recipient(encryptionKey)
+func encryptWithPassphrase(data, passphrase string) (string, error) {
+	// Derive a key from the passphrase using PBKDF2
+	key := pbkdf2.Key([]byte(passphrase), []byte("salt"), 100000, 32, sha256.New)
+
+	// Create a new AES cipher block
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
 
+	// Generate a random nonce for GCM mode
+	nonce := make([]byte, 12)
+	_, err = io.ReadFull(rand.Reader, nonce) // Correct usage of rand.Reader
+	if err != nil {
+		return "", err
+	}
+
+	// Create GCM mode
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	// Encrypt the data using GCM
+	ciphertext := aesGCM.Seal(nil, nonce, []byte(data), nil)
+
+	// Armor the encrypted data
 	var b bytes.Buffer
 	armorWriter := armor.NewWriter(&b)
-	writer, err := age.Encrypt(armorWriter, recipient)
-	if err != nil {
-		return "", err
-	}
-
-	_, err = io.WriteString(writer, data)
-	if err != nil {
-		return "", err
-	}
-
-	err = writer.Close()
+	_, err = armorWriter.Write(append(nonce, ciphertext...)) // Prepend nonce to ciphertext
 	if err != nil {
 		return "", err
 	}
