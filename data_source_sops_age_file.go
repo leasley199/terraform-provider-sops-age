@@ -1,4 +1,4 @@
-package sopsage
+package main
 
 import (
 	"context"
