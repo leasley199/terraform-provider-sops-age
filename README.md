@@ -1,4 +1,4 @@
-# terraform-provider-sops-age
+# terraform-provider-sopsage
 
 
 A Terraform provider for creating and managing SOPs Age Keys. See [Mozilla sops](https://github.com/mozilla/sops) for more info on SOPs Age.
@@ -9,7 +9,7 @@ A Terraform provider for creating and managing SOPs Age Keys. See [Mozilla sops]
 ## Example Usage
 
 ```hcl
-provider "sops-age" {}
+provider "sopsage" {}
 
 # Creating a new SOPS Age key
 resource "sops_age_key" "main" {
@@ -30,5 +30,5 @@ output "public_key" {
 
 ## Development
 ```sh
-go build -v -o ~/.terraform.d/plugins/registry.terraform.io/local/sops-age/0.0.#/linux_amd64/terraform-provider-sops-age_v0.0.#
+go build -v -o ~/.terraform.d/plugins/registry.terraform.io/local/sopsage/0.0.#/linux_amd64/terraform-provider-sopsage_v0.0.#
 ```
