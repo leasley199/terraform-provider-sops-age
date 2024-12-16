@@ -10,18 +10,18 @@ A Terraform provider for creating and managing SOPs Age Keys. See [Mozilla sops]
 provider "sopsage" {}
 
 # Creating a new SOPS Age key
-resource "sops_age_key" "main" {
+resource "sopsage_key" "main" {
     provider = sopsage
 }
 
 # Output of Private Key Displayed (Returns value of `private_key = <sensitive>`)
 output "private_key" {
-  value = sops_age_key.main.private_key
+  value = sopsage_key.main.private_key
   sensitive = true
 }
 
 # Output of Public Key Displayed
 output "public_key" {
-  value = sops_age_key.main.public_key
+  value = sopsage_key.main.public_key
 }
 ```

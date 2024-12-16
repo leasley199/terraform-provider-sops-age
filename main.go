@@ -17,10 +17,10 @@ func main() {
 					},
 				},
 				ResourcesMap: map[string]*schema.Resource{
-					"sops_age_key": resourceSopsAgeKey(),
+					"sopsage_key": resourceSopsAgeKey(),
 				},
 				DataSourcesMap: map[string]*schema.Resource{
-					"sops_age_file": dataSourceSopsAgeFile(),
+					"sopsage_file": dataSourceSopsAgeFile(),
 				},
 			}
 		},
