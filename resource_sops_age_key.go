@@ -59,7 +59,7 @@ func resourceSopsAgeKeyCreate(d *schema.ResourceData, m interface{}) error {
 	// Set the keys in the Terraform state
 	d.Set("private_key", encryptedPrivateKey)
 	d.Set("public_key", identity.Recipient().String())
-	d.SetId(fmt.Sprintf("sops-age-key-%s", identity.Recipient().String()))
+	d.SetId(fmt.Sprintf("sops_age_key_%s", identity.Recipient().String()))
 
 	return resourceSopsAgeKeyRead(d, m)
 }
